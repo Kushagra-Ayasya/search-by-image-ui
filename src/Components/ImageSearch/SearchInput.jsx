@@ -1,12 +1,12 @@
 const SearchInput = () => {
   return (
-    <div className="flex items-center mt-6">
+    <div className="flex items-center mt-6 overflow-hidden rounded-lg border border-gray-400 w-full max-w-md">
       <input
         type="text"
         placeholder="Search for products"
-        className="flex-1 border border-black rounded-l-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="flex-1 px-4 py-2 text-gray-700 focus:outline-none bg-white"
       />
-      <button className="bg-gray-900 border-black text-black font-medium py-2 px-6 rounded-r-md transition">
+      <button className="bg-gray-500 text-white font-semibold px-6 py-2">
         Search
       </button>
     </div>
