@@ -7,7 +7,7 @@ import { FaCamera } from "react-icons/fa";
 const ImageUpload = () => {
   const [tempImage, setTempImage] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false); // 🔴 New
+  const [isAnalyzing, setIsAnalyzing] = useState(false); 
   const { setUploadedImage } = useImage();
   const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ const ImageUpload = () => {
 
   const handleCropComplete = (croppedUrl) => {
     setUploadedImage(croppedUrl);
-    setIsAnalyzing(true);        // 🔴 Show spinner
+    setIsAnalyzing(true);        
     setShowCropper(false);       // Close cropper
 
     // Fake delay before navigating
