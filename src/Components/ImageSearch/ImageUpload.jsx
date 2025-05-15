@@ -33,7 +33,7 @@ const ImageUpload = () => {
 
       const data = await response.json();
       console.log('Upload results:', data.results);
-     AIN:      setSearchResults(data.results);
+      setSearchResults(data.results);
       setIsAnalyzing(false);
       navigate('/results');
     } catch (error) {
@@ -47,10 +47,10 @@ const ImageUpload = () => {
     <div className="flex justify-center items-center bg-gray-100">
       <label
         htmlFor="upload"
-        className="border-2 border-dashed border-gray-400 p-10 rounded-lg cursor-pointer hover:bg-gray-200"
+        className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-200 flex flex-col items-center justify-center text-center"
       >
-        <FaCamera className="text-4xl mb-4" />
-        <p className="text-lg font-semibold">Click to Upload Image</p>
+        <FaCamera className="text-4xl text-gray-600 mb-3" />
+        <p className="text-lg font-semibold text-gray-700">Click to Upload Image</p>
         <input
           type="file"
           id="upload"
