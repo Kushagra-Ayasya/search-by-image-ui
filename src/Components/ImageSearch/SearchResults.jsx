@@ -19,10 +19,8 @@ const SearchResults = () => {
   const [openFilter, setOpenFilter] = useState(null);
   const failedImages = useRef(new Set());
 
-  console.log('Rendering SearchResults', { currentPage, selectedFilters, searchResults });
 
   const filteredResults = useMemo(() => {
-    console.log('Computing filteredResults', { searchResults });
     if (!searchResults.length) return [];
     return searchResults;
   }, [searchResults]);

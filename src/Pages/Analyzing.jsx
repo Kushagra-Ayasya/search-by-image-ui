@@ -1,4 +1,4 @@
-// src/pages/Analyzing.jsx
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AnalyzingScreen from "../Components/ImageSearch/AnalyzingScreen";
@@ -9,7 +9,7 @@ const Analyzing = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       navigate("/results");
-    }, 10000); // Simulate 5 seconds of analyzing
+    }, 10000); 
 
     return () => clearTimeout(timeout);
   }, [navigate]);

@@ -6,7 +6,7 @@ export const useImage = () => useContext(ImageContext);
 
 export const ImageProvider = ({ children }) => {
   const [uploadedImage, setUploadedImage] = useState(null);
-  const [searchResults, setSearchResults] = useState([]);  // <-- Add this
+  const [searchResults, setSearchResults] = useState([]); 
 
   return (
     <ImageContext.Provider value={{ uploadedImage, setUploadedImage, searchResults, setSearchResults }}>

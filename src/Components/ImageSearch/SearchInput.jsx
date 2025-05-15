@@ -29,7 +29,6 @@ const SearchInput = () => {
       }
 
       const data = await response.json();
-      console.log('Search results:', data.results); // Add this for debugging
       setSearchResults(data.results);
       setError(null);
       navigate('/results');
