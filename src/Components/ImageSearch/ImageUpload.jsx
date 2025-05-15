@@ -1,68 +1,79 @@
-import { useState } from "react";
-import ImageCropper from "./ImageCropper";
-import { useImage } from "../../Context/ImageContext";
-import { useNavigate } from "react-router-dom";
-import { FaCamera } from "react-icons/fa";
+import { useState } from 'react';
+import { useImage } from '../../Context/ImageContext';
+import { useNavigate } from 'react-router-dom';
+import { FaCamera } from 'react-icons/fa';
 
 const ImageUpload = () => {
-  const [tempImage, setTempImage] = useState(null);
-  const [showCropper, setShowCropper] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false); 
-  const { setUploadedImage } = useImage();
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [error, setError] = useState(null);
+  const { setUploadedImage, setSearchResults } = useImage();
   const navigate = useNavigate();
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setTempImage(imageUrl);
-      setShowCropper(true);
+    if (!file) return;
+
+    setUploadedImage(URL.createObjectURL(file));
+    setIsAnalyzing(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Upload failed');
+      }
+
+      const data = await response.json();
+      console.log('Upload results:', data.results);
+     AIN:      setSearchResults(data.results);
+      setIsAnalyzing(false);
+      navigate('/results');
+    } catch (error) {
+      console.error('Upload error:', error.message);
+      setError(error.message);
+      setIsAnalyzing(false);
     }
   };
 
-  const handleCropComplete = (croppedUrl) => {
-    setUploadedImage(croppedUrl);
-    setIsAnalyzing(true);        
-    setShowCropper(false);       // Close cropper
-
-    // Fake delay before navigating
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      navigate("/results");
-    }, 2000); // adjust delay if needed
-  };
-
   return (
-    <>
+    <div className="flex justify-center items-center bg-gray-100">
       <label
-        htmlFor="image-upload"
-        className="border-2 border-dashed border-gray-400 rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition"
+        htmlFor="upload"
+        className="border-2 border-dashed border-gray-400 p-10 rounded-lg cursor-pointer hover:bg-gray-200"
       >
-        <FaCamera className="text-4xl text-gray-600 mb-4" />
-        <p className="text-lg font-medium text-gray-700">Upload an image</p>
+        <FaCamera className="text-4xl mb-4" />
+        <p className="text-lg font-semibold">Click to Upload Image</p>
         <input
           type="file"
-          id="image-upload"
+          id="upload"
           accept="image/*"
-          onChange={handleImageUpload}
           className="hidden"
+          onChange={handleImageUpload}
         />
       </label>
 
-      {showCropper && (
-        <ImageCropper imageSrc={tempImage} onComplete={handleCropComplete} />
-      )}
-
       {isAnalyzing && (
-        <div className="absolute inset-0 flex items-center justify-center bg-opacity-50 z-50">
-          <div className="w-[600px] h-[500px] bg-white rounded-xl border border-black flex flex-col items-center justify-center p-6">
-            <div className="w-16 h-16 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-6"></div>
-            <h2 className="text-xl font-semibold text-gray-700">Analyzing image...</h2>
-            <p className="text-gray-500 mt-2">This may take a few seconds</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-10 rounded-lg text-center">
+            <div className="loader mb-4"></div>
+            <h2 className="text-lg font-medium">Analyzing Image...</h2>
+            <p className="text-sm text-gray-600 mt-2">Please wait a few seconds</p>
           </div>
         </div>
       )}
-    </>
+
+      {error && (
+        <p className="text-red-600 mt-4 text-sm text-center">{error}</p>
+      )}
+    </div>
   );
 };
 

@@ -1,28 +1,35 @@
-import { useImage } from "../../Context/ImageContext";
-import { useState } from "react";
+import { useImage } from '../../Context/ImageContext';
+import { useState, useMemo, useRef } from 'react';
 
-// Dummy data
 const filters = [
-  { name: "Tile Design", options: ["Glossy Finish", "Matte Finish", "Carving Finish"] },
-  { name: "Color", options: ["Red", "Blue", "Green", "Yellow"] },
-  { name: "Tile Collections", options: ["Classic", "Modern", "Vintage"] },
-  { name: "Tile Type", options: ["Ceramic", "Porcelain", "Marble"] },
-  { name: "Factory Production", options: ["Factory 1", "Factory 2", "Factory 3"] },
-  { name: "Tile Size", options: ["Small", "Medium", "Large"] },
+  { name: 'Tile Design', options: ['Glossy Finish', 'Matte Finish', 'Carving Finish'] },
+  { name: 'Color', options: ['Red', 'Blue', 'Green', 'Yellow'] },
+  { name: 'Tile Collections', options: ['Classic', 'Modern', 'Vintage'] },
+  { name: 'Tile Type', options: ['Ceramic', 'Porcelain', 'Marble'] },
+  { name: 'Factory Production', options: ['Factory 1', 'Factory 2', 'Factory 3'] },
+  { name: 'Tile Size', options: ['Small', 'Medium', 'Large'] },
 ];
 
-const mockProducts = new Array(50).fill(0); // 50 items to test pagination
 const ITEMS_PER_PAGE = 9;
 
 const SearchResults = () => {
-  const { uploadedImage } = useImage();
+  const { uploadedImage, searchResults } = useImage();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedFilters, setSelectedFilters] = useState({});
-  const [openFilter, setOpenFilter] = useState(null); // Track which filter dropdown is open
+  const [openFilter, setOpenFilter] = useState(null);
+  const failedImages = useRef(new Set());
 
-  const totalPages = Math.ceil(mockProducts.length / ITEMS_PER_PAGE);
+  console.log('Rendering SearchResults', { currentPage, selectedFilters, searchResults });
+
+  const filteredResults = useMemo(() => {
+    console.log('Computing filteredResults', { searchResults });
+    if (!searchResults.length) return [];
+    return searchResults;
+  }, [searchResults]);
+
+  const totalPages = Math.ceil(filteredResults.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentProducts = mockProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const currentProducts = filteredResults.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -43,14 +50,14 @@ const SearchResults = () => {
         newFilters[filterName] = [option];
       }
       if (newFilters[filterName].length === 0) {
-        delete newFilters[filterName]; // Remove filter if no options selected
+        delete newFilters[filterName];
       }
       return newFilters;
     });
   };
 
   const toggleFilterDropdown = (filterName) => {
-    setOpenFilter(openFilter === filterName ? null : filterName); // Toggle dropdown
+    setOpenFilter(openFilter === filterName ? null : filterName);
   };
 
   const renderPageNumbers = () => {
@@ -59,20 +66,20 @@ const SearchResults = () => {
     for (let i = 1; i <= totalPages; i++) {
       if (visiblePages.includes(i) || (i >= currentPage - 1 && i <= currentPage + 1)) {
         pages.push(i);
-      } else if (pages[pages.length - 1] !== "...") {
-        pages.push("...");
+      } else if (pages[pages.length - 1] !== '...') {
+        pages.push('...');
       }
     }
     return pages.map((page, idx) => (
       <button
         key={idx}
-        onClick={() => typeof page === "number" && goToPage(page)}
+        onClick={() => typeof page === 'number' && goToPage(page)}
         className={`px-3 py-1 rounded-md text-sm ${
           page === currentPage
-            ? "bg-blue-600 text-white font-semibold"
-            : "text-gray-700 hover:bg-gray-200"
+            ? 'bg-blue-600 text-white font-semibold'
+            : 'text-gray-700 hover:bg-gray-200'
         }`}
-        disabled={page === "..." ? true : false}
+        disabled={page === '...' ? true : false}
       >
         {page}
       </button>
@@ -81,22 +88,26 @@ const SearchResults = () => {
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
-      <h1 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-6">Search results</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-6">
+        Search Results
+      </h1>
 
-      {/* Uploaded Image Box */}
-      <div className="bg-white border rounded-xl p-4 md:p-6 max-w-3xl mx-auto mb-6 flex items-center space-x-4">
-        {uploadedImage ? (
-          <img src={uploadedImage} alt="Uploaded" className="w-20 h-20 object-cover rounded-md" />
-        ) : (
-          <div className="w-20 h-20 bg-gray-300 rounded-md" />
-        )}
-        <div>
-          <p className="text-lg font-semibold text-gray-800">Image uploaded</p>
-          <p className="text-gray-500">Here are some products that match the image you uploaded.</p>
+      {uploadedImage && (
+        <div className="bg-white border rounded-xl p-4 md:p-6 max-w-3xl mx-auto mb-6 flex items-center space-x-4">
+          <img
+            src={uploadedImage}
+            alt="Uploaded"
+            className="w-20 h-20 object-cover rounded-md"
+          />
+          <div>
+            <p className="text-lg font-semibold text-gray-800">Uploaded Image</p>
+            <p className="text-gray-500">
+              Here are some products that match the image you uploaded.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-6 justify-center mb-6">
         {filters.map((filter) => (
           <div key={filter.name} className="relative">
@@ -109,7 +120,7 @@ const SearchResults = () => {
               {filter.name}
               <span
                 className={`ml-2 transform transition-transform duration-200 ${
-                  openFilter === filter.name ? "rotate-180" : ""
+                  openFilter === filter.name ? 'rotate-180' : ''
                 }`}
               >
                 ▼
@@ -139,30 +150,49 @@ const SearchResults = () => {
         ))}
       </div>
 
-      {/* Product Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-10">
-        {currentProducts.map((_, idx) => (
-          <div key={idx} className="bg-white rounded-xl overflow-hidden shadow-sm border cursor-pointer">
-            <div className="h-40 bg-gray-300"></div>
-            <div className="p-3">
-              <p className="font-semibold text-gray-800">Product Name</p>
-              <p className="text-sm text-gray-500">Description</p>
-              <p className="text-sm text-gray-500">1000 INR</p>
-            </div>
-          </div>
-        ))}
+        {currentProducts.length > 0 ? (
+          currentProducts.map((product, idx) => {
+            const { url, score, filename } = product;
+
+            return (
+              <div
+                key={url + idx}
+                className="bg-white rounded-xl overflow-hidden shadow-sm border cursor-pointer"
+              >
+                <img
+                  src={`http://127.0.0.1:5000${url}`}
+                  alt={filename}
+                  className="h-40 w-full object-cover"
+                  onError={(e) => {
+                    if (!failedImages.current.has(url)) {
+                      failedImages.current.add(url);
+                      e.target.src = '/images/fallback.jpg';
+                      console.error(`Failed to load image: ${url}`);
+                    }
+                  }}
+                />
+                <div className="p-3">
+                  <p className="font-semibold text-gray-800">{filename}</p>
+                  <p className="text-sm text-gray-500">Similarity: {(score * 100).toFixed(2)}%</p>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <p className="text-center text-gray-500 col-span-full">No products found.</p>
+        )}
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-center items-center gap-2 text-gray-700">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
           className={`px-3 py-1 rounded-md text-sm ${
-            currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "hover:bg-gray-200"
+            currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-200'
           }`}
         >
-          &lt; Previous
+           Previous
         </button>
 
         {renderPageNumbers()}
@@ -171,10 +201,10 @@ const SearchResults = () => {
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
           className={`px-3 py-1 rounded-md text-sm ${
-            currentPage === totalPages ? "text-gray-400 cursor-not-allowed" : "hover:bg-gray-200"
+            currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-200'
           }`}
         >
-          Next &gt;
+          Next 
         </button>
       </div>
     </div>
